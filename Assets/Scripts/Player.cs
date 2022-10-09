@@ -18,7 +18,7 @@ public class Player : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.S))
         {
-            playerRigid.velocity = transform.forward * -wb_speed * Time.deltaTime;
+            playerRigid.velocity = -transform.forward * wb_speed * Time.deltaTime;
         }
     }
 
