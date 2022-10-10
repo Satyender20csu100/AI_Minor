@@ -9,15 +9,22 @@ public class DancerController : MonoBehaviour
 
     [SerializeField] float enemySpeed = 2f;
 
-    int waypointIndex = 0;
+    int waypointIndex = 1;
 
     private NavMeshAgent navMeshAgent;
 
     public Animator dancerAnim;
 
+    private bool isReached = false;
+
     private void Start()
     {
+        //dancerAnim.ResetTrigger("Idle");
+        dancerAnim.SetTrigger("Walking");
         transform.position = waypoints[waypointIndex].position; // Starting enemy position = 1st waypoint.
+
+        navMeshAgent.destination = waypoints[waypointIndex].position;
+        transform.LookAt(navMeshAgent.destination);
     }
 
     private void Awake()
@@ -53,29 +60,38 @@ public class DancerController : MonoBehaviour
 
     private void Move()
     {
-        if (waypointIndex <= waypoints.Count - 1)
+        if (waypointIndex < waypoints.Count - 1)
         {
-            dancerAnim.SetTrigger("Walking");
-            navMeshAgent.destination = waypoints[waypointIndex].position;
-
-
-            transform.LookAt(navMeshAgent.destination);
-
-            if (Vector3.Distance(transform.position, waypoints[waypointIndex].position) < 0.1f)
+            if (Vector3.Distance(transform.position, waypoints[waypointIndex].position) < 0.1f && !isReached)
             {
+                isReached = true;
                 dancerAnim.ResetTrigger("Walking");
                 dancerAnim.SetTrigger("Idle");
 
-                StartCoroutine(Wait(3));
                 waypointIndex++;
+
+                dancerAnim.ResetTrigger("Idle");
+                dancerAnim.SetTrigger("Walking");
+                navMeshAgent.destination = waypoints[waypointIndex].position;
+
+                transform.LookAt(navMeshAgent.destination);
+                isReached = false;
 
             }
         }
         else
         {
-            dancerAnim.ResetTrigger("Walking");
-            dancerAnim.SetTrigger("Dancing");
-            StartCoroutine(Wait(3));
+            if (Vector3.Distance(transform.position, waypoints[waypointIndex].position) < 0.1f && !isReached)
+            {
+                isReached = true;
+                dancerAnim.ResetTrigger("Walking");
+                dancerAnim.SetTrigger("Dancing");
+
+                StartCoroutine(Wait(5));
+
+                
+
+            }
 
         }
 
@@ -84,5 +100,16 @@ public class DancerController : MonoBehaviour
     IEnumerator Wait(float time)
     {
         yield return new WaitForSeconds(time);
+
+        dancerAnim.ResetTrigger("Dancing");
+        waypointIndex = 0;
+
+        dancerAnim.SetTrigger("Walking");
+        navMeshAgent.destination = waypoints[waypointIndex].position;
+
+        transform.LookAt(navMeshAgent.destination);
+
+        dancerAnim.SetTrigger("Walking");
+        isReached = false;
     }
 }
